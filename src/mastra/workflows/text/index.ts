@@ -18,7 +18,7 @@ export const textWorkflow = new Workflow({
 
 textWorkflow
   .step(searchBooksStep)
-  //.then(getBooksStep)
+  .then(getBooksStep)
   .commit();
 
 export default textWorkflow; 

@@ -17,13 +17,13 @@ export const getBooksStep = new Step({
     books: z.array(bookSchema),
   }),
   execute: async ({ context }) => {
-    const { searchResults } = context.inputData;
-    console.log(searchResults);
+    const { results } = context.steps.searchBooks.output;
+    console.log('getBooksStep - searchResults: ', results);
 
     const books: Book[] = [];
 
-    for (const result of searchResults) {
-      console.log('processing result: ', result);
+    for (const result of results) {
+      console.log('getBooksStep - processing result: ', result);
 
       const dynamicWorkflow = new Workflow({
         name: 'getBook',
@@ -38,7 +38,7 @@ export const getBooksStep = new Step({
       dynamicWorkflow.step(getBookStep).commit();
 
       const run = dynamicWorkflow.createRun();
-      console.log('starting run: ', run);
+      console.log('getBooksStep - starting dynamic workflow run: ', run);
 
       const res = await run.start({
         triggerData: {
@@ -48,10 +48,9 @@ export const getBooksStep = new Step({
         },
       });
 
-
       // Defensive: check status and output
       const stepResult = res.results[getBookStep.id];
-      console.log('stepResult: ', stepResult);
+      console.log('getBooksStep - stepResult: ', stepResult);
 
       if (stepResult && stepResult.status === "success" && stepResult.output) {
         books.push(stepResult.output as Book);
