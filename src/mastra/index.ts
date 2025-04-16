@@ -11,7 +11,7 @@ import { textWorkflow } from './workflows/text';
 // Create a logger with less verbose level to reduce output
 const logger = createLogger({
   name: 'mastra',
-  level: 'debug'
+  level: 'info'
 });
 
 // Create the Mastra instance with our components

@@ -26,13 +26,19 @@ export const searchBooksStep = new Step({
     execute: async ({ context }) => {
         try {
             const { prompt } = context.inputData;
+            console.log(prompt);
 
-            const response = await mastra.getAgent('searchBooks').generate(
-                { messages: [{ role: 'user', content: prompt }] },
+            const agent = mastra.getAgent('searchBooks');
+            console.log(agent);
+
+            const response = await agent.generate(
+                [{ role: "user", content: prompt }],
                 {
                     output: z.array(searchResultSchema)
                 }
             );
+
+            console.log(response.object);
 
             return { results: response.object };
         } catch (error) {
