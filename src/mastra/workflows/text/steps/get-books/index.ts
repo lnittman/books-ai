@@ -7,6 +7,7 @@ import { bookSchema, searchResultSchema } from "../get-book/schemas";
 import { mastra } from "../../../../index";
 
 type Book = z.infer<typeof bookSchema>;
+type SearchResult = z.infer<typeof searchResultSchema>;
 
 export const getBooksStep = new Step({
   id: "getBooks",
@@ -17,14 +18,13 @@ export const getBooksStep = new Step({
     books: z.array(bookSchema),
   }),
   execute: async ({ context }) => {
-    const { results } = context.steps.searchBooks.output;
-    console.log('getBooksStep - searchResults: ', results);
+    const searchBooksStep = context.steps.searchBooks;
+    const results = searchBooksStep?.status === "success"
+      ? searchBooksStep.output.results
+      : [];
 
-    const books: Book[] = [];
-
-    for (const result of results) {
-      console.log('getBooksStep - processing result: ', result);
-
+    // Create an array of promises for parallel execution
+    const bookPromises = results.map(async (result: SearchResult) => {
       const dynamicWorkflow = new Workflow({
         name: 'getBook',
         mastra,
@@ -35,12 +35,9 @@ export const getBooksStep = new Step({
         }),
       });
 
+      // Commit the step to the workflow, create and start a run
       dynamicWorkflow.step(getBookStep).commit();
-
-      const run = dynamicWorkflow.createRun();
-      console.log('getBooksStep - starting dynamic workflow run: ', run);
-
-      const res = await run.start({
+      const res = await dynamicWorkflow.createRun().start({
         triggerData: {
           title: result.title,
           author: result.author,
@@ -48,17 +45,16 @@ export const getBooksStep = new Step({
         },
       });
 
-      // Defensive: check status and output
       const stepResult = res.results[getBookStep.id];
-      console.log('getBooksStep - stepResult: ', stepResult);
-
       if (stepResult && stepResult.status === "success" && stepResult.output) {
-        books.push(stepResult.output as Book);
+        return stepResult.output as Book;
       } else {
         console.error(`Failed to get book for ${result.title} by ${result.author}`);
+        return null;
       }
-    }
+    });
 
-    return { books };
+    // Wait for all promises to resolve in parallel and filter out null results
+    return { books: (await Promise.all(bookPromises)).filter(Boolean) as Book[] };
   },
 }); 

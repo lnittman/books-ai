@@ -26,7 +26,6 @@ export const searchBooksStep = new Step({
     execute: async ({ context }) => {
         try {
             const prompt = context.triggerData.prompt;
-            console.log('searchBooksStep - prompt: ', prompt);
 
             const response = await mastra.getAgent('searchBooks').generate(
                 [{ role: "user", content: prompt }],
@@ -35,7 +34,6 @@ export const searchBooksStep = new Step({
                 }
             );
 
-            console.log('searchBooksStep - response: ', response.object);
             return { results: response.object };
         } catch (error) {
             return {

@@ -10,10 +10,7 @@ export const getBookStep = new Step({
   outputSchema: bookSchema,
   description: `Extracts structured book data using the get-book agent`,
   execute: async ({ context }) => {
-    console.log('getBookStep - context: ', context);
-
     const { goodreadsUrl } = context.triggerData;
-    console.log('getBookStep - goodreadsUrl: ', goodreadsUrl);
 
     const response = await mastra.getAgent('getBook').generate(
       [{ role: "user", content: goodreadsUrl }],
@@ -22,7 +19,6 @@ export const getBookStep = new Step({
       }
     );
 
-    console.log('getBookStep - response: ', response.object);
     return response.object as z.infer<typeof bookSchema>;
   }
 });
