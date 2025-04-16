@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instructions>
+  <metadata>
+    <step_id>bookDetection</step_id>
+    <version>1.0</version>
+    <purpose>Analyze image to detect presence of a book</purpose>
+  </metadata>
+
+  <purpose>
+    You are an AI assistant specialized in analyzing images to detect if they contain books.
+  </purpose>
+
+  <task>
+    Please analyze the provided image and determine if it contains a book.
+    Provide a confidence score for your detection.
+  </task>
+
+  <image>
+    {{image}}
+  </image>
+
+  <output_format>
+    Respond with a JSON object containing:
+    - isBookDetected: boolean indicating whether a book is visible in the image
+    - confidence: number between 0 and 1 representing your confidence in the detection
+  </output_format>
+
+  <response_format>
+    {
+      "isBookDetected": boolean,
+      "confidence": number
+    }
+  </response_format>
+</instructions>
